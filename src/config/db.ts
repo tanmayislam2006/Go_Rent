@@ -8,13 +8,14 @@ export const pool = new Pool({
 
 const initializeDb = async () => {
   try {
-    await pool.query(`CREATE TABLE IF NOT EXISTS user_table(
-      id SERIAL PRIMARY KEY,
-      name TEXT NOT NULL,
-      email TEXT NOT NULL UNIQUE CHECK (email = LOWER(email)),
-      password TEXT NOT NULL,
-      role TEXT NOT NULL DEFAULT 'customer' CHECK (role IN ('admin','customer'))
-    )`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS users_table(
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE CHECK (email = LOWER(email)),
+  password TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT 'customer' CHECK (role IN ('customer','admin'))
+)`);
 
     await pool.query(`CREATE TABLE IF NOT EXISTS vehicles(
       id SERIAL PRIMARY KEY,
@@ -27,7 +28,7 @@ const initializeDb = async () => {
 
     await pool.query(`CREATE TABLE IF NOT EXISTS booking(
       id SERIAL PRIMARY KEY,
-      customer_id INT NOT NULL REFERENCES user_table(id) ON DELETE CASCADE,
+      customer_id INT NOT NULL REFERENCES users_table(id) ON DELETE CASCADE,
       vehicle_id INT NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
       rent_start_date DATE NOT NULL,
       rent_end_date DATE NOT NULL,
@@ -41,4 +42,4 @@ const initializeDb = async () => {
     console.log("Database initialization failed:", error.message);
   }
 };
-export default initializeDb
+export default initializeDb;
