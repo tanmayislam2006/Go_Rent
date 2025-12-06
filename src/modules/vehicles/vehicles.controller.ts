@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { adminService } from "./admin.service";
+import { vehiclesService } from "./vehicles.service";
 
 const createVehicleData = async (req: Request, res: Response) => {
   try {
-    const result = await adminService.createVehicleData(req.body);
+    const result = await vehiclesService.createVehicleData(req.body);
     res.status(201).json({
       success: true,
       message: "Vehicle created successfully",
@@ -18,7 +18,7 @@ const createVehicleData = async (req: Request, res: Response) => {
 
 const getAllVehicles = async (req: Request, res: Response) => {
   try {
-    const result = await adminService.getAllVehicles();
+    const result = await vehiclesService.getAllVehicles();
     res.status(200).json({
       success: true,
       message: result.length
@@ -35,7 +35,7 @@ const getAllVehicles = async (req: Request, res: Response) => {
 const getASingleVehicle = async (req: Request, res: Response) => {
   const { vehicleId } = req.params;
   try {
-    const result = await adminService.getASingleVehicle(vehicleId as string);
+    const result = await vehiclesService.getASingleVehicle(vehicleId as string);
     res.status(200).json({
       success: true,
       message: "Vehicle retrieved successfully",
@@ -50,7 +50,7 @@ const getASingleVehicle = async (req: Request, res: Response) => {
 const updateVehicleData = async (req: Request, res: Response) => {
   const { vehicleId } = req.params;
   try {
-    const result = await adminService.updateVehicleData(
+    const result = await vehiclesService.updateVehicleData(
       vehicleId as string,
       req.body
     );
@@ -68,7 +68,9 @@ const updateVehicleData = async (req: Request, res: Response) => {
 const deleteASingleVehicle = async (req: Request, res: Response) => {
   const { vehicleId } = req.params;
   try {
-    const result = await adminService.deleteASingleVehicle(vehicleId as string);
+    const result = await vehiclesService.deleteASingleVehicle(
+      vehicleId as string
+    );
     res.status(200).json({
       success: true,
       message: result.message,
@@ -80,10 +82,10 @@ const deleteASingleVehicle = async (req: Request, res: Response) => {
   }
 };
 
-export const adminController = {
+export const vehiclesController = {
   createVehicleData,
   getAllVehicles,
   getASingleVehicle,
   updateVehicleData,
-  deleteASingleVehicle
+  deleteASingleVehicle,
 };

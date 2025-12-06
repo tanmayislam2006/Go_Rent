@@ -35,10 +35,10 @@ const updateVehicleData = async (
   vehicleId: string,
   updateInfo: Record<string, any>
 ) => {
-    const exit = await pool.query(`SELECT * FROM vehicles WHERE id=$1`, [
+    const exist = await pool.query(`SELECT * FROM vehicles WHERE id=$1`, [
       vehicleId,
     ]);
-    if (exit.rows.length === 0) {
+    if (exist.rows.length === 0) {
       throw new Error("Vehicle not found");
     }
     const {
@@ -62,19 +62,20 @@ const updateVehicleData = async (
     return result.rows[0];
 };
 const deleteASingleVehicle = async (vehicleId: string) => {
-  const exit = await pool.query(`SELECT * FROM vehicles WHERE id=$1`, [
+  const exist = await pool.query(`SELECT * FROM vehicles WHERE id=$1`, [
     vehicleId,
   ]);
-  if (exit.rows.length === 0) {
+  if (exist.rows.length === 0) {
     throw new Error("Vehicle not found");
   }
   await pool.query(`DELETE FROM vehicles WHERE id=$1`, [vehicleId]);
   return { message: "Vehicle deleted successfully" };
 };
-export const adminService = {
+
+export const vehiclesService = {
   createVehicleData,
   getAllVehicles,
   getASingleVehicle,
   updateVehicleData,
-  deleteASingleVehicle
+  deleteASingleVehicle,
 };
