@@ -1,4 +1,5 @@
 import { pool } from "../../config/db";
+import { Availability } from "../../enum/availabilityStatus";
 
 const createVehicleData = async (vehicleInfo: Record<string, any>) => {
   const {
@@ -67,6 +68,10 @@ const deleteASingleVehicle = async (vehicleId: string) => {
   ]);
   if (exist.rows.length === 0) {
     throw new Error("Vehicle not found");
+  }
+  const existInfo =exist.rows[0]
+  if(existInfo.availability_status === Availability.BOOKED){
+    throw new Error('Vehicle is Booked')
   }
   await pool.query(`DELETE FROM vehicles WHERE id=$1`, [vehicleId]);
   return { message: "Vehicle deleted successfully" };

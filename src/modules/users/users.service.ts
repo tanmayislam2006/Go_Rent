@@ -1,4 +1,5 @@
 import { pool } from "../../config/db";
+import { Status } from "../../enum/bookingStatus";
 
 const getAllUsers = async () => {
   const result = await pool.query(`SELECT * FROM users_table`);
@@ -32,11 +33,19 @@ const deleteUser = async (userId: string) => {
   if (exist.rows.length === 0) {
     throw new Error("User Not Found");
   }
+  const activeBookings = await pool.query(
+    `SELECT * FROM booking WHERE customer_id=$1 AND status=$2`,
+    [userId, Status.ACTIVE]
+  );
+
+  if (activeBookings.rows.length > 0) {
+    throw new Error("User cannot be deleted because they have active bookings");
+  }
   await pool.query(`DELETE FROM users_table WHERE id=$1`, [userId]);
-  return{message:`User deleted successfully`}
+  return { message: `User deleted successfully` };
 };
 export const userServices = {
   getAllUsers,
   updateUser,
-  deleteUser
+  deleteUser,
 };

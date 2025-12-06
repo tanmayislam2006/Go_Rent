@@ -15,6 +15,27 @@ const createBooking = async (req: Request, res: Response) => {
       .json({ success: false, message: error.message, error: error });
   }
 };
+const updateBooking = async (req: Request, res: Response) => {
+  const userIdInToken =req.user?.id
+  const { bookingId } = req.params;
+  try {
+    const result = await bookingService.updateBooking(
+      bookingId as string,
+      req.body,
+      userIdInToken
+    );
+    res.status(200).json({
+      success: true,
+      message: "Booking update successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    res
+      .status(400)
+      .json({ success: false, message: error.message, error: error });
+  }
+};
 export const bookingController = {
   createBooking,
+  updateBooking
 };

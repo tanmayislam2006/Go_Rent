@@ -53,7 +53,45 @@ const createBooking = async (bookingInfo: Record<string, any>) => {
   };
   return response;
 };
+const updateBooking = async (
+  bookingId: string,
+  bookingInfo: Record<string, any>,
+  userIdInToken: number
+) => {
+  const { status } = bookingInfo;
+  const validStatuses = new Set<string>(Object.values(Status));
 
+  if (!validStatuses.has(status)) {
+    throw new Error(`Invalid status: ${status}`);
+  }
+  const findTheBooking = await pool.query(`SELECT * FROM booking WHERE id=$1`, [
+    bookingId,
+  ]);
+  if (findTheBooking.rows.length === 0) {
+    throw new Error("Booking Not Found");
+  }
+  const { customer_id } = findTheBooking?.rows[0];
+  if (customer_id !== userIdInToken) {
+    throw new Error("You are not authorized to update this booking");
+  }
+
+  const result = await pool.query(
+    `UPDATE booking SET status=$1 WHERE id=$2 RETURNING *`,
+    [status, bookingId]
+  );
+  const bookingInfoDb = result.rows[0];
+  if (
+    bookingInfo.status === Status.CANCELLED ||
+    bookingInfo.status === Status.RETURNED
+  ) {
+    await pool.query(`UPDATE vehicles SET availability_status=$1 WHERE id=$2`, [
+      Availability.AVAILABLE,
+      bookingInfoDb.vehicle_id,
+    ]);
+  }
+  return bookingInfoDb;
+};
 export const bookingService = {
   createBooking,
+  updateBooking,
 };
