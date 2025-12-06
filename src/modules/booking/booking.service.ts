@@ -1,7 +1,29 @@
 import { pool } from "../../config/db";
 import { Availability } from "../../enum/availabilityStatus";
 import { Status } from "../../enum/bookingStatus";
-
+import { Role } from "../../enum/role";
+const getBookings = async (userInfoToken: Record<string, any>) => {
+  if (userInfoToken.role === Role.CUSTOMER) {
+    const result = await pool.query(
+      `SELECT * FROM booking WHERE customer_id=$1`,
+      [userInfoToken.id]
+    );
+    const response = {
+      success: true,
+      message: "Your bookings retrieved successfully",
+      data: result.rows,
+    };
+    return response
+  } else {
+    const result = await pool.query(`SELECT * FROM booking`);
+    const response = {
+      success: true,
+      message: "Bookings retrieved successfully",
+      data: result.rows,
+    };
+    return response;
+  }
+};
 const createBooking = async (bookingInfo: Record<string, any>) => {
   const { customer_id, vehicle_id, rent_start_date, rent_end_date } =
     bookingInfo;
@@ -94,4 +116,5 @@ const updateBooking = async (
 export const bookingService = {
   createBooking,
   updateBooking,
+  getBookings,
 };

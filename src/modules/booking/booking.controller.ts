@@ -1,6 +1,19 @@
 import { Request, Response } from "express";
 import { bookingService } from "./booking.service";
 
+const getBookings = async (req: Request, res: Response) => {
+  const userInfoInToken = req.user;
+  try {
+    const result = await bookingService.getBookings(
+      userInfoInToken as Record<string, any>
+    );
+    res.status(200).json({ ...result });
+  } catch (error: any) {
+    res
+      .status(400)
+      .json({ success: false, message: error.message, error: error });
+  }
+};
 const createBooking = async (req: Request, res: Response) => {
   try {
     const result = await bookingService.createBooking(req.body);
@@ -16,7 +29,7 @@ const createBooking = async (req: Request, res: Response) => {
   }
 };
 const updateBooking = async (req: Request, res: Response) => {
-  const userIdInToken =req.user?.id
+  const userIdInToken = req.user?.id;
   const { bookingId } = req.params;
   try {
     const result = await bookingService.updateBooking(
@@ -37,5 +50,6 @@ const updateBooking = async (req: Request, res: Response) => {
 };
 export const bookingController = {
   createBooking,
-  updateBooking
+  updateBooking,
+  getBookings,
 };
