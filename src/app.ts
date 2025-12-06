@@ -3,6 +3,7 @@ import initializeDb from "./config/db";
 import { authRoutes } from "./modules/auth/auth.routes";
 import { vehiclesRoutes } from "./modules/vehicles/vehicles.routes";
 import { userRoutes } from "./modules/users/users.routes";
+import { bookingRouter } from "./modules/booking/booking.routes";
 const app = express();
 app.use(express.json());
 // TODO initializeDb
@@ -18,4 +19,5 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/vehicles", vehiclesRoutes);
 app.use("/api/v1/users", userRoutes);
 // ! customer routes
+app.use('/api/v1/bookings',bookingRouter)
 export default app;
