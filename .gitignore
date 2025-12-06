@@ -5,3 +5,5 @@ dist
 .vscode
 *.log
 *.tsbuildinfo
+.vercel
+.env*.local
