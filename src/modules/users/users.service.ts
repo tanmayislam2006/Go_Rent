@@ -1,17 +1,25 @@
 import { pool } from "../../config/db";
 import { Status } from "../../enum/bookingStatus";
+import { Role } from "../../enum/role";
 
 const getAllUsers = async () => {
   const result = await pool.query(`SELECT * FROM users_table`);
   return result.rows;
 };
-const updateUser = async (userId: string, userInfo: Record<string, any>) => {
+const updateUser = async (userInfoInToken:Record<string,any>,userId: string, userInfo: Record<string, any>) => {
   const isExist = await pool.query(`SELECT * FROM users_table WHERE id=$1`, [
     userId,
   ]);
+  console.log(isExist.rows[0]);
   if (isExist.rows.length === 0) {
     throw new Error("User Not Found");
   }
+    const { id } = isExist?.rows[0];
+    if (userInfoInToken.role === Role.CUSTOMER) {
+      if (id !== userInfoInToken.id) {
+        throw new Error("You are not authorized to update this user");
+      }
+    }
   const { name, email, phone, role } = userInfo;
   const result = await pool.query(
     `UPDATE users_table SET name=$1,email=$2,phone=$3,role=$4 WHERE id=$5 RETURNING *`,

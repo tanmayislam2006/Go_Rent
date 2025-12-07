@@ -20,7 +20,8 @@ const getAllUsers = async (req: Request, res: Response) => {
 const updateUser = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
-    const result = await userServices.updateUser(userId as string, req.body);
+    const userInfoInToken =req.user
+    const result = await userServices.updateUser(userInfoInToken as Record<string,any>,userId as string, req.body);
     res.status(200).json({
       success: true,
       message: "User updated successfully",

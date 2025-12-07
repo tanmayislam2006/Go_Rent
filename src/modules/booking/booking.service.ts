@@ -13,7 +13,7 @@ const getBookings = async (userInfoToken: Record<string, any>) => {
       message: "Your bookings retrieved successfully",
       data: result.rows,
     };
-    return response
+    return response;
   } else {
     const result = await pool.query(`SELECT * FROM booking`);
     const response = {
@@ -78,7 +78,7 @@ const createBooking = async (bookingInfo: Record<string, any>) => {
 const updateBooking = async (
   bookingId: string,
   bookingInfo: Record<string, any>,
-  userIdInToken: number
+  userInfoInToken: Record<string, any>
 ) => {
   const { status } = bookingInfo;
   const validStatuses = new Set<string>(Object.values(Status));
@@ -93,26 +93,46 @@ const updateBooking = async (
     throw new Error("Booking Not Found");
   }
   const { customer_id } = findTheBooking?.rows[0];
-  if (customer_id !== userIdInToken) {
-    throw new Error("You are not authorized to update this booking");
+  if (userInfoInToken.role === Role.CUSTOMER) {
+    if (customer_id !== userInfoInToken.id) {
+      throw new Error("You are not authorized to update this booking");
+    }
   }
 
   const result = await pool.query(
     `UPDATE booking SET status=$1 WHERE id=$2 RETURNING *`,
     [status, bookingId]
   );
+
   const bookingInfoDb = result.rows[0];
+  let responseMessage = `Booking ${status} successfully`;
+  let responseData: any = bookingInfoDb;
   if (
     bookingInfo.status === Status.CANCELLED ||
     bookingInfo.status === Status.RETURNED
   ) {
-    await pool.query(`UPDATE vehicles SET availability_status=$1 WHERE id=$2`, [
-      Availability.AVAILABLE,
-      bookingInfoDb.vehicle_id,
-    ]);
+    const updateTheVehicle = await pool.query(
+      `UPDATE vehicles SET availability_status=$1 WHERE id=$2 RETURNING *`,
+      [Availability.AVAILABLE, bookingInfoDb.vehicle_id]
+    );
+    
+    if (userInfoInToken.role === Role.ADMIN) {
+      responseMessage = "Booking marked as returned. Vehicle is now available";
+      responseData = {
+        ...bookingInfoDb,
+        vehicle: {
+          availability_status: updateTheVehicle.rows[0].availability_status,
+        },
+      };
+    }
   }
-  return bookingInfoDb;
+  return {
+    success: true,
+    message: responseMessage,
+    data: responseData,
+  };
 };
+
 export const bookingService = {
   createBooking,
   updateBooking,
