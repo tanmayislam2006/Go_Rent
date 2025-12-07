@@ -33,6 +33,20 @@ const createBooking = async (bookingInfo: Record<string, any>) => {
   const number_of_days = Math.ceil(
     (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
   );
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // remove time portion
+
+  if (start < today) {
+    throw new Error("rent_start_date cannot be in the past");
+  }
+
+  if (end < today) {
+    throw new Error("rent_end_date cannot be in the past");
+  }
+
+  if (end <= start) {
+    throw new Error("rent_end_date must be after rent_start_date");
+  }
   if (number_of_days <= 0) {
     throw new Error(
       `Invalid rent period: rent_end_date must be after rent_start_date`
@@ -115,7 +129,7 @@ const updateBooking = async (
       `UPDATE vehicles SET availability_status=$1 WHERE id=$2 RETURNING *`,
       [Availability.AVAILABLE, bookingInfoDb.vehicle_id]
     );
-    
+
     if (userInfoInToken.role === Role.ADMIN) {
       responseMessage = "Booking marked as returned. Vehicle is now available";
       responseData = {
